@@ -1,6 +1,9 @@
+#include <WiFi.h>
+#include <esp_wps.h>
+
 #include "wifi.h"
 
-unsigned short wifi[1600] = {
+uint16_t wifi[1600] = {
     0xFFFF,
     0xFFFF,
     0xFFFF,
@@ -1603,43 +1606,98 @@ unsigned short wifi[1600] = {
     0xFFFF,
 };
 
-unsigned short current[1600];
+uint16_t current[sizeof(wifi) / sizeof(wifi[0])];
+
+enum state_t
+{
+    IDLE = 0,
+    WPS_START = 1,
+    WPS_WAIT = 2,
+};
+
+state_t currentState = IDLE;
+uint16_t lastColor = 0;
+
+esp_wps_config_t wps_config;
 
 void WifiButton::redraw()
 {
-    auto color = m_state == WPS ? ILI9341_YELLOW : ILI9341_RED;
-
-    ::memcpy(current, wifi, sizeof(wifi));
-
-    for (auto row = 0; row < 40; row++)
-        for (auto col = 0; col < 40; col++)
-        {
-            auto index = 40 * row + col;
-
-            if (wifi[index] == 0xffff)
-                current[index] = 0;
-            else
-                current[index] = color;
-        }
+    if (!lastColor)
+        return;
 
     s_display.drawRGBBitmap(m_x, m_y, current, 40, 40);
 }
 
 void WifiButton::touch(const Point &pt)
 {
-    m_state = WPS;
+    currentState = WPS_START;
     m_mustDraw = true;
 }
 
 void WifiButton::loop()
 {
-    switch (m_state)
+    auto color =
+        currentState == WPS_START || currentState == WPS_WAIT
+            ? ILI9341_YELLOW
+        : WiFi.status() == WL_CONNECTED
+            ? ILI9341_GREEN
+            : ILI9341_RED;
+
+    if (color != lastColor)
     {
-    case WPS:
-    {
-        m_state = CONNECTING;
+        lastColor = color;
+
+        for (auto row = 0; row < 40; row++)
+            for (auto col = 0; col < 40; col++)
+            {
+                auto index = 40 * row + col;
+
+                if (wifi[index] == 0xffff)
+                    current[index] = 0;
+                else
+                    current[index] = color;
+            }
+
         m_mustDraw = true;
-        break;
     }
-    }
+
+    if (currentState == IDLE)
+        return;
+
+    esp_wifi_wps_enable(&wps_config);
+    esp_wifi_wps_start(0);
+
+    currentState = WPS_WAIT;
+    m_mustDraw = true;
+}
+
+void WifiButton::setup()
+{
+    ScreenArea::setup();
+
+    memset(&wps_config, 0, sizeof(wps_config));
+
+    wps_config.wps_type = WPS_TYPE_PBC;
+
+    WiFi.onEvent(
+        [](WiFiEvent_t event, arduino_event_info_t info)
+        {
+            switch (event)
+            {
+            case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+                WiFi.reconnect();
+                break;
+            case ARDUINO_EVENT_WPS_ER_SUCCESS:
+                esp_wifi_wps_disable();
+
+                WiFi.begin();
+
+                currentState = IDLE;
+                break;
+            }
+        });
+
+    WiFi.mode(WIFI_MODE_STA);
+
+    WiFi.begin();
 }
