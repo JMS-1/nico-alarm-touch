@@ -3,6 +3,16 @@
 #include <Adafruit_ILI9341.h>
 #include <XPT2046_Touchscreen.h>
 
+#define TFT_WIDTH 320
+#define TFT_HEIGHT 240
+
+#define TOUCH_X_MIN 390
+#define TOUCH_X_MAX 3900
+#define TOUCH_Y_MIN 290
+#define TOUCH_Y_MAX 3800
+#define TOUCH_WIDTH (TOUCH_X_MAX - TOUCH_X_MIN)
+#define TOUCH_HEIGHT (TOUCH_Y_MAX - TOUCH_Y_MIN)
+
 struct Point
 {
     int16_t x;
@@ -21,6 +31,10 @@ protected:
     const int16_t m_height;
     bool m_mustDraw = true;
 
+protected:
+    static Adafruit_ILI9341 s_display;
+    static XPT2046_Touchscreen s_touch;
+
 public:
     void clear(uint16_t color = ILI9341_BLACK);
 
@@ -31,12 +45,13 @@ protected:
 public:
     virtual void touchTest(const Point &pt);
     virtual void redrawTest();
+    virtual void loop();
+    virtual void setup();
 
 public:
     static bool touchToScreen(Point &pt);
 
 public:
     static void hide();
-    static void setup();
     static void show();
 };

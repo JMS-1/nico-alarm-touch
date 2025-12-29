@@ -1,8 +1,8 @@
 #include <screen.h>
 #include <wifi.h>
 
-int16_t lastX = -1;
-int16_t lastY = -1;
+int16_t lastX = -1000;
+int16_t lastY = -1000;
 
 time_t lastTouch = time(nullptr);
 
@@ -12,7 +12,8 @@ void setup()
 {
     Serial.begin(115200);
 
-    ScreenArea::setup();
+    for (auto area : areas)
+        area->setup();
 }
 
 void loop(void)
@@ -33,6 +34,11 @@ void loop(void)
         lastX = pt.x;
         lastY = pt.y;
     }
+    else
+    {
+        lastX = -1000;
+        lastY = -1000;
+    }
 
     // Test for redraw.
     if (difftime(time(nullptr), lastTouch) >= 15)
@@ -43,5 +49,11 @@ void loop(void)
             area->redrawTest();
 
         ScreenArea::show();
+
+        delay(500);
     }
+
+    // Do background processing.
+    for (auto area : areas)
+        area->loop();
 }

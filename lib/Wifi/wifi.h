@@ -5,12 +5,22 @@
 class WifiButton : public ScreenArea
 {
 public:
-    WifiButton() : ScreenArea(100, 100, 50, 50) {}
+    WifiButton() : ScreenArea(TFT_WIDTH - 60, 5, 40, 40) {}
 
 private:
-    uint16_t m_color = ILI9341_MAGENTA;
+    enum state_t
+    {
+        CONNECTING,
+        WPS,
+        CONNECTED
+    };
+
+    state_t m_state = CONNECTING;
 
 protected:
     void redraw();
     void touch(const Point &pt);
+
+public:
+    void loop();
 };

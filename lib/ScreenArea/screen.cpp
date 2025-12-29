@@ -1,17 +1,7 @@
 #include "screen.h"
 
-#define TFT_WIDTH 320
-#define TFT_HEIGHT 240
-
-#define TOUCH_X_MIN 390
-#define TOUCH_X_MAX 3900
-#define TOUCH_Y_MIN 290
-#define TOUCH_Y_MAX 3800
-#define TOUCH_WIDTH (TOUCH_X_MAX - TOUCH_X_MIN)
-#define TOUCH_HEIGHT (TOUCH_Y_MAX - TOUCH_Y_MIN)
-
-Adafruit_ILI9341 s_display(5, 4, 22);
-XPT2046_Touchscreen s_touch(14, 27);
+Adafruit_ILI9341 ScreenArea::s_display(5, 4, 22);
+XPT2046_Touchscreen ScreenArea::s_touch(14, 27);
 
 bool hidden = false;
 
@@ -21,6 +11,8 @@ void ScreenArea::clear(uint16_t color)
 }
 
 void ScreenArea::touch(const Point &pt) {}
+
+void ScreenArea::loop() {}
 
 void ScreenArea::touchTest(const Point &pt)
 {
@@ -39,9 +31,6 @@ void ScreenArea::redrawTest()
 
     m_mustDraw = false;
 
-    Serial.println("drawing");
-
-    clear();
     redraw();
 }
 
