@@ -1616,6 +1616,7 @@ enum state_t
 };
 
 state_t currentState = IDLE;
+time_t wpsStart;
 uint16_t lastColor = 0;
 
 esp_wps_config_t wps_config;
@@ -1632,6 +1633,15 @@ void WifiButton::touch(const Point &pt)
 {
     currentState = WPS_START;
     m_mustDraw = true;
+}
+
+void endWps()
+{
+    esp_wifi_wps_disable();
+
+    WiFi.begin();
+
+    currentState = IDLE;
 }
 
 void WifiButton::loop()
@@ -1661,14 +1671,26 @@ void WifiButton::loop()
         m_mustDraw = true;
     }
 
-    if (currentState == IDLE)
-        return;
+    switch (currentState)
+    {
+    case WPS_START:
+        esp_wifi_wps_enable(&wps_config);
+        esp_wifi_wps_start(0);
 
-    esp_wifi_wps_enable(&wps_config);
-    esp_wifi_wps_start(0);
+        wpsStart = time(nullptr);
 
-    currentState = WPS_WAIT;
-    m_mustDraw = true;
+        currentState = WPS_WAIT;
+        m_mustDraw = true;
+
+        break;
+    case WPS_WAIT:
+    {
+        if (difftime(time(nullptr), wpsStart) >= 30)
+            endWps();
+
+        break;
+    }
+    }
 }
 
 void WifiButton::setup()
@@ -1688,11 +1710,7 @@ void WifiButton::setup()
                 WiFi.reconnect();
                 break;
             case ARDUINO_EVENT_WPS_ER_SUCCESS:
-                esp_wifi_wps_disable();
-
-                WiFi.begin();
-
-                currentState = IDLE;
+                endWps();
                 break;
             }
         });

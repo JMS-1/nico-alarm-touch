@@ -16,6 +16,9 @@ void ScreenArea::loop() {}
 
 void ScreenArea::touchTest(const Point &pt)
 {
+    if (hidden)
+        return;
+
     if (pt.x < m_x || pt.x >= m_x + m_width)
         return;
     if (pt.y < m_y || pt.y >= m_y + m_height)

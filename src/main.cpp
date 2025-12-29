@@ -6,7 +6,8 @@ int16_t lastY = -1000;
 
 time_t lastTouch = time(nullptr);
 
-ScreenArea *areas[] = {new WifiButton()};
+ScreenArea *areas[] = {
+    new WifiButton()};
 
 void setup()
 {
