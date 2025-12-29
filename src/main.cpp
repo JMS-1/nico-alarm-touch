@@ -4,6 +4,8 @@
 int16_t lastX = -1;
 int16_t lastY = -1;
 
+time_t lastTouch = time(nullptr);
+
 ScreenArea *areas[] = {new WifiButton()};
 
 void setup()
@@ -15,18 +17,31 @@ void setup()
 
 void loop(void)
 {
-    auto debounce = false;
-
+    // Check for a touch.
     Point pt;
     if (ScreenArea::touchToScreen(pt))
-        if (pt.x != lastX && pt.y != lastY)
+    {
+        // Remember time of last user interaction.
+        lastTouch = time(nullptr);
+
+        // Forward to all areas if.
+        if (abs(pt.x - lastX) >= 5 || abs(pt.y - lastY) >= 5)
             for (auto area : areas)
-                if (area->touchTest(pt))
-                    debounce = true;
+                area->touchTest(pt);
 
-    for (auto area : areas)
-        area->redrawTest();
+        // Remember last touch.
+        lastX = pt.x;
+        lastY = pt.y;
+    }
 
-    if (debounce)
-        delay(500);
+    // Test for redraw.
+    if (difftime(time(nullptr), lastTouch) >= 15)
+        ScreenArea::hide();
+    else
+    {
+        for (auto area : areas)
+            area->redrawTest();
+
+        ScreenArea::show();
+    }
 }

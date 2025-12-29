@@ -10,8 +10,10 @@
 #define TOUCH_WIDTH (TOUCH_X_MAX - TOUCH_X_MIN)
 #define TOUCH_HEIGHT (TOUCH_Y_MAX - TOUCH_Y_MIN)
 
-Adafruit_ILI9341 ScreenArea::s_display(5, 4, 22);
-XPT2046_Touchscreen ScreenArea::s_touch(14, 27);
+Adafruit_ILI9341 s_display(5, 4, 22);
+XPT2046_Touchscreen s_touch(14, 27);
+
+bool hidden = false;
 
 void ScreenArea::clear(uint16_t color)
 {
@@ -20,25 +22,26 @@ void ScreenArea::clear(uint16_t color)
 
 void ScreenArea::touch(const Point &pt) {}
 
-bool ScreenArea::touchTest(const Point &pt)
+void ScreenArea::touchTest(const Point &pt)
 {
     if (pt.x < m_x || pt.x >= m_x + m_width)
-        return false;
+        return;
     if (pt.y < m_y || pt.y >= m_y + m_height)
-        return false;
+        return;
 
     touch(pt);
-
-    return m_mustDraw;
 }
 
 void ScreenArea::redrawTest()
 {
-    if (!m_mustDraw)
+    if (!m_mustDraw && !hidden)
         return;
 
     m_mustDraw = false;
 
+    Serial.println("drawing");
+
+    clear();
     redraw();
 }
 
@@ -70,4 +73,19 @@ void ScreenArea::setup()
     s_touch.setRotation(1);
 
     s_display.fillScreen(ILI9341_BLACK);
+}
+
+void ScreenArea::hide()
+{
+    if (hidden)
+        return;
+
+    hidden = true;
+
+    s_display.fillScreen(ILI9341_BLACK);
+}
+
+void ScreenArea::show()
+{
+    hidden = false;
 }

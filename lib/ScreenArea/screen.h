@@ -21,24 +21,22 @@ protected:
     const int16_t m_height;
     bool m_mustDraw = true;
 
-protected:
-    void clear(uint16_t color);
+public:
+    void clear(uint16_t color = ILI9341_BLACK);
 
 protected:
     virtual void redraw() = 0;
     virtual void touch(const Point &pt);
 
 public:
-    virtual bool touchTest(const Point &pt);
+    virtual void touchTest(const Point &pt);
     virtual void redrawTest();
 
 public:
     static bool touchToScreen(Point &pt);
 
-protected:
-    static Adafruit_ILI9341 s_display;
-    static XPT2046_Touchscreen s_touch;
-
 public:
+    static void hide();
     static void setup();
+    static void show();
 };
