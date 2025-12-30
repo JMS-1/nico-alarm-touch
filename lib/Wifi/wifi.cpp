@@ -4,7 +4,7 @@
 #include "wifi.h"
 
 // clang-format off
-uint16_t wifi[1600] = {
+static uint16_t wifi[1600] = {
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -54,11 +54,11 @@ enum state_t
     WPS_WAIT = 2,
 };
 
-state_t currentState = IDLE;
-time_t wpsStart;
-uint16_t lastColor = 0;
+static state_t currentState = IDLE;
+static time_t wpsStart;
+static uint16_t lastColor = 0;
 
-esp_wps_config_t wps_config;
+static esp_wps_config_t wps_config;
 
 void WifiButton::redraw()
 {
@@ -81,6 +81,11 @@ void endWps()
     WiFi.begin();
 
     currentState = IDLE;
+}
+
+bool WifiButton::isConnected()
+{
+    return currentState == IDLE && WiFi.status() == WL_CONNECTED;
 }
 
 void WifiButton::loop()

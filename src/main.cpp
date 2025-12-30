@@ -1,4 +1,6 @@
+#include <api.h>
 #include <screen.h>
+#include <text.h>
 #include <wifi.h>
 
 int16_t lastX = -1000;
@@ -6,8 +8,13 @@ int16_t lastY = -1000;
 
 time_t lastTouch = time(nullptr);
 
-ScreenArea *areas[] = {
-    new WifiButton()};
+ApiServer api;
+
+Text message(80);
+Text when(50);
+WifiButton wifi;
+
+ScreenArea *areas[] = {&wifi, &when, &message};
 
 void setup()
 {
@@ -19,6 +26,17 @@ void setup()
 
 void loop(void)
 {
+    // Time to setup web server.
+    api.loop(
+        wifi.isConnected(),
+        [](const String &newWhen, const String &newMessage)
+        {
+            when.setText(newWhen);
+            message.setText(newMessage);
+
+            lastTouch = time(nullptr);
+        });
+
     // Check for a touch.
     Point pt;
     if (ScreenArea::touchToScreen(pt))

@@ -3,7 +3,8 @@
 Adafruit_ILI9341 ScreenArea::s_display(5, 4, 22);
 XPT2046_Touchscreen ScreenArea::s_touch(14, 27);
 
-bool hidden = false;
+static bool hidden = false;
+static bool mustSetup = true;
 
 void ScreenArea::clear(uint16_t color)
 {
@@ -55,6 +56,11 @@ bool ScreenArea::touchToScreen(Point &pt)
 
 void ScreenArea::setup()
 {
+    if (!mustSetup)
+        return;
+
+    mustSetup = false;
+
     pinMode(15, OUTPUT);
     digitalWrite(15, LOW);
 

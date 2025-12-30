@@ -12,6 +12,7 @@ protected:
     void touch(const Point &pt);
 
 public:
+    bool isConnected();
     void loop();
     void setup();
 };
