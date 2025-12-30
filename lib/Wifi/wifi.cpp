@@ -90,6 +90,8 @@ bool WifiButton::isConnected()
 
 void WifiButton::loop()
 {
+    ScreenArea::loop();
+
     auto color =
         currentState == WPS_START || currentState == WPS_WAIT
             ? ILI9341_YELLOW

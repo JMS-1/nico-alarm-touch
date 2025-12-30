@@ -52,6 +52,8 @@ String utf8ToGFX(const String &utf8)
 
 void Text::redraw()
 {
+    clear();
+
     s_display.cp437(true);
     s_display.setCursor(m_x, m_y);
     s_display.setTextColor(ILI9341_WHITE);

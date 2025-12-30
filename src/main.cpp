@@ -1,7 +1,9 @@
 #include <api.h>
+#include <attention.h>
 #include <screen.h>
 #include <text.h>
 #include <wifi.h>
+#include "Arduino.h"
 
 int16_t lastX = -1000;
 int16_t lastY = -1000;
@@ -10,13 +12,14 @@ time_t lastTouch = time(nullptr);
 
 ApiServer api;
 
-Text message(80);
-Text when(50);
+Attention attention;
+Text message(100);
+Text when(70);
 WifiButton wifi;
 
-ScreenArea *areas[] = {&wifi, &when, &message};
+ScreenArea *areas[] = {&when, &message, &wifi, &attention};
 
-void setup()
+void setup(void)
 {
     Serial.begin(115200);
 
@@ -24,18 +27,23 @@ void setup()
         area->setup();
 }
 
+void apiCommand(const String &newWhen, const String &newMessage)
+{
+    when.setText(newWhen);
+    message.setText(newMessage);
+
+    lastTouch = time(nullptr);
+
+    if (newMessage.isEmpty())
+        attention.stop();
+    else
+        attention.start();
+}
+
 void loop(void)
 {
     // Time to setup web server.
-    api.loop(
-        wifi.isConnected(),
-        [](const String &newWhen, const String &newMessage)
-        {
-            when.setText(newWhen);
-            message.setText(newMessage);
-
-            lastTouch = time(nullptr);
-        });
+    api.loop(wifi.isConnected(), apiCommand);
 
     // Check for a touch.
     Point pt;
@@ -60,7 +68,7 @@ void loop(void)
     }
 
     // Test for redraw.
-    if (difftime(time(nullptr), lastTouch) >= 15)
+    if (difftime(time(nullptr), lastTouch) >= 30)
         ScreenArea::hide();
     else
     {
