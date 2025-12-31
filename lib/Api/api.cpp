@@ -14,16 +14,19 @@ void process(String cmd, ApiServer::TOnChange onChange)
 {
     String when;
 
-    if (!cmd.isEmpty() && server.hasArg("text"))
+    if (!cmd.isEmpty())
     {
-        auto text = server.arg("text");
+        if (server.hasArg("text"))
+        {
+            auto text = server.arg("text");
 
-        if (!text.isEmpty())
-            cmd = text;
+            if (!text.isEmpty())
+                cmd = text;
+        }
+
+        if (server.hasArg("time"))
+            when = server.arg("time");
     }
-
-    if (server.hasArg("time"))
-        when = server.arg("time");
 
     lastMessage = cmd;
     lastTime = when;
