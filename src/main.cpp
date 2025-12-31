@@ -22,9 +22,12 @@ ScreenArea *areas[] = {&when, &message, &wifi, &attention};
 void setup(void)
 {
     Serial.begin(115200);
+    Serial.println("Startup...");
 
     for (auto area : areas)
         area->setup();
+
+    Serial.println("Ready");
 }
 
 void apiCommand(const String &newWhen, const String &newMessage)

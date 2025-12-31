@@ -61,6 +61,8 @@ void ScreenArea::setup()
 
     mustSetup = false;
 
+    Serial.println("Setup Display and Touch...");
+
     pinMode(15, OUTPUT);
     digitalWrite(15, LOW);
 
@@ -71,6 +73,8 @@ void ScreenArea::setup()
     s_touch.setRotation(1);
 
     s_display.fillScreen(ILI9341_BLACK);
+
+    Serial.println("Display and Touch ready");
 }
 
 void ScreenArea::hide()
