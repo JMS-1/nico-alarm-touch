@@ -85,9 +85,13 @@ void ScreenArea::hide()
     hidden = true;
 
     s_display.fillScreen(ILI9341_BLACK);
+
+    digitalWrite(15, HIGH);
 }
 
 void ScreenArea::show()
 {
     hidden = false;
+
+    digitalWrite(15, LOW);
 }
