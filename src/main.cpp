@@ -1,5 +1,6 @@
 #include <api.h>
 #include <attention.h>
+#include <button.h>
 #include <screen.h>
 #include <text.h>
 #include <wifi.h>
@@ -13,27 +14,18 @@ time_t lastTouch = time(nullptr);
 ApiServer api;
 
 Attention attention;
+Button off("Gesehen", 10, 180, 100, 30, false);
 Text message(100);
 Text when(70);
 WifiButton wifi;
 
-ScreenArea *areas[] = {&when, &message, &wifi, &attention};
-
-void setup(void)
-{
-    Serial.begin(115200);
-    Serial.println("Startup...");
-
-    for (auto area : areas)
-        area->setup();
-
-    Serial.println("Ready");
-}
+ScreenArea *areas[] = {&when, &message, &off, &wifi, &attention};
 
 void apiCommand(const String &newWhen, const String &newMessage)
 {
     when.setText(newWhen);
     message.setText(newMessage);
+    off.setVisible(!newWhen.isEmpty());
 
     lastTouch = time(nullptr);
 
@@ -41,6 +33,21 @@ void apiCommand(const String &newWhen, const String &newMessage)
         attention.stop();
     else
         attention.start();
+}
+
+void setup(void)
+{
+    Serial.begin(115200);
+    Serial.println("Startup...");
+
+    off.onClick(
+        []
+        { api.off(apiCommand); });
+
+    for (auto area : areas)
+        area->setup();
+
+    Serial.println("Ready");
 }
 
 void loop(void)

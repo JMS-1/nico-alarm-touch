@@ -10,4 +10,5 @@ public:
 
 public:
     void loop(bool isConnected, TOnChange onChange);
+    void off(TOnChange onChange);
 };

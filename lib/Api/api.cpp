@@ -36,6 +36,11 @@ void process(String cmd, ApiServer::TOnChange onChange)
     onChange(lastTime, lastMessage);
 }
 
+void ApiServer::off(TOnChange onChange)
+{
+    process("", onChange);
+}
+
 void ApiServer::loop(bool isConnected, TOnChange onChange)
 {
     if (!isConnected)
@@ -92,13 +97,18 @@ void ApiServer::loop(bool isConnected, TOnChange onChange)
 
         server.on(
             "/OFF",
-            [onChange]
-            { process("", onChange); });
+            [onChange, this]
+            { off(onChange); });
 
         server.on(
             "/TEXT",
             [onChange]
             { process("TEXT", onChange); });
+
+        server.on(
+            "/STATUS",
+            []
+            { server.send(200, "text/plain", lastTime.c_str()); });
 
         server.onNotFound(
             []
